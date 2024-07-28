@@ -16,7 +16,9 @@ npm install bootstrap
 npm install react-tabs
 
 
-cd pydagoras_frontend
-cp ./my-app/src/App.jsx mh/src
-cp ./my-app/src/main.jsx mh/src
-cp ./my-app/index.html .
+cp ../my-app/src/App.jsx src
+cp ../my-app/src/main.jsx src
+cp ../my-app/index.html .
+
+cd mh
+npm run dev
