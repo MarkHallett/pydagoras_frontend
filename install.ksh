@@ -16,6 +16,7 @@ npm install bootstrap
 npm install react-tabs
 
 
-cd src
-cp /Users/python/pydagoras/git/mhwork/src/App.jsx .
-cp /Users/python/pydagoras/git/mhwork/src/main.jsx .
+cd pydagoras_frontend
+cp ./my-app/src/App.jsx mh/src
+cp ./my-app/src/main.jsx mh/src
+cp ./my-app/index.html .
