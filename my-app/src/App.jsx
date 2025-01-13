@@ -13,7 +13,11 @@ import Col from 'react-bootstrap/Col';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import 'react-tabs/style/react-tabs.css'
 
-const SOCKET_URL_ONE = 'ws://localhost:8000/ws/123';
+//const BACK_END_HOST = 'localhost';
+const BACK_END_HOST = 'pydagoras.com';
+const BACK_END_PORT = '8000';
+const BACK_END = BACK_END_HOST + ':' + BACK_END_PORT;
+const SOCKET_URL_ONE = 'ws://' + BACK_END + '/ws/123';
 const READY_STATE_OPEN = 1;
 
 
@@ -43,17 +47,17 @@ const handleKeyDown = (event) => {
       console.log('Send node/value', event.target.id, event.target.value)
 
       if (event.target.id === 'nodeA') {
-        axios.patch('http://localhost:8000/items/gbp-usd?value=' + event.target.value ,
+        axios.patch('http://' + BACK_END + '/items/gbp-usd?value=' + event.target.value ,
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
 
       if (event.target.id === 'nodeB') {
-        axios.patch('http://localhost:8000/items/usd-eur?value=' + event.target.value ,
+        axios.patch('http://' + BACK_END + '/items/usd-eur?value=' + event.target.value ,
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
 
       if (event.target.id === 'nodeC') {
-        axios.patch('http://localhost:8000/items/eur-gbp?value=' + event.target.value ,
+        axios.patch('http://' + BACK_END + '/items/eur-gbp?value=' + event.target.value ,
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
     }
@@ -118,15 +122,15 @@ function App() {
     e.preventDefault();
     console.log('Send all node values, nodeA', nodeA, 'nodeB', nodeB, 'nodeC', nodeC)
 
-    axios.patch('http://localhost:8000/items/gbp-usd?value=' + nodeA ,
+    axios.patch('http://' + BACK_END + '/items/gbp-usd?value=' + nodeA ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
 
-    axios.patch('http://localhost:8000/items/usd-eur?value=' + nodeB ,
+    axios.patch('http://' + BACK_END + '/items/usd-eur?value=' + nodeB ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
 
-    axios.patch('http://localhost:8000/items/eur-gbp?value=' + nodeC ,
+    axios.patch('http://' + BACK_END + '/items/eur-gbp?value=' + nodeC ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
   }
