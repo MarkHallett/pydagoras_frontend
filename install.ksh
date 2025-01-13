@@ -21,4 +21,4 @@ cp ../my-app/src/main.jsx src
 cp ../my-app/index.html .
 
 cd mh
-npm run dev
+npm run dev -- --host
