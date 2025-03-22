@@ -229,7 +229,7 @@ return (
         <Row xs={2} md={4} lg={6}>
           <Col>gbp-usd</Col>
           <Col> <Form.Control 
-                    id="nodeAA"
+                    id="nodeA"
                     type="number" 
                     value={nodeValue}
                     placeholder="Node value" 
