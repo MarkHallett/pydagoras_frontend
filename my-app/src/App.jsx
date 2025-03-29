@@ -13,7 +13,14 @@ import Col from 'react-bootstrap/Col';
 import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import 'react-tabs/style/react-tabs.css'
 
-const SOCKET_URL_ONE = 'wss://pydagoras.com:8000/ws/123';
+// prod or dev back end
+//const BACK_END_HOST = 'ws://localhost';
+const BACK_END_HOST = 'wss://pydagoras.com';
+
+const BACK_END_PORT = '8000';
+const BACK_END = BACK_END_HOST + ':' + BACK_END_PORT;
+const SOCKET_URL_ONE = BACK_END + '/ws/123';
+
 const READY_STATE_OPEN = 1;
 
 
@@ -43,32 +50,32 @@ const handleKeyDown = (event) => {
       console.log('Send node/value', event.target.id, event.target.value)
 
       if (event.target.id === 'nodeA') {
-        axios.patch('https://pydagoras.com:8000/items/gbp-usd?value=' + event.target.value ,
+        axios.patch('https://' + BACK_END + '/items/gbp-usd?value=' + event.target.value ,
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
 
       if (event.target.id === 'nodeB') {
-        axios.patch('https://pydagoras.com:8000/items/usd-eur?value=' + event.target.value ,
+        axios.patch('https://' + BACK_END + '/items/usd-eur?value=' + event.target.value ,
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
 
       if (event.target.id === 'nodeC') {
-        axios.patch('https://pydagoras.com:8000/items/eur-gbp?value=' + event.target.value ,
+        axios.patch('https://' + BACK_END + '/items/eur-gbp?value=' + event.target.value ,
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
 
       if (event.target.id === 'nodeAA') {
-        axios.patch('https://pydagoras.com:8000/items/A?value=' + event.target.value ,
+        axios.patch('https://' + BACK_END + '/items/A?value=' + event.target.value ,
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
 
       if (event.target.id === 'nodeBB') {
-        axios.patch('https://pydagoras.com:8000/items/B?value=' + event.target.value ,
+        axios.patch('https://' + BACK_END + '/items/B?value=' + event.target.value ,
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
 
       if (event.target.id === 'nodeCC') {
-        axios.patch('https://pydagoras.com:8000/items/C?value=' + event.target.value ,
+        axios.patch('https://' + BACK_END + '/items/C?value=' + event.target.value ,
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
 
@@ -140,15 +147,15 @@ function App() {
     e.preventDefault();
     console.log('Send all node values, nodeA', nodeA, 'nodeB', nodeB, 'nodeC', nodeC)
 
-    axios.patch('https://pydagoras.com:8000/items/gbp-usd?value=' + nodeA ,
+    axios.patch('https://' + BACK_END + '/items/gbp-usd?value=' + nodeA ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
 
-    axios.patch('https://pydagoras.com:8000/items/usd-eur?value=' + nodeB ,
+    axios.patch('https://' + BACK_END + '/items/usd-eur?value=' + nodeB ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
 
-    axios.patch('https://pydagoras.com:8000/items/eur-gbp?value=' + nodeC ,
+    axios.patch('https://' + BACK_END + '/items/eur-gbp?value=' + nodeC ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
   }
@@ -157,15 +164,15 @@ function App() {
     e.preventDefault();
     console.log('Send all node values, nodeAA', nodeAA, 'nodeBB', nodeBB, 'nodeCC', nodeCC)
 
-    axios.patch('https://pydagoras.com:8000/items/A?value=' + nodeAA ,
+    axios.patch('https://' + BACK_END + '/items/A?value=' + nodeAA ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
 
-    axios.patch('https://pydagoras.com:8000/items/B?value=' + nodeBB ,
+    axios.patch('https://' + BACK_END + '/items/B?value=' + nodeBB ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
 
-    axios.patch('https://pydagoras.com:8000/items/C?value=' + nodeCC ,
+    axios.patch('https://' + BACK_END + '/items/C?value=' + nodeCC ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
   }
@@ -174,11 +181,11 @@ function App() {
     e.preventDefault();
     console.log('Send all node values, nodeAA', nodeAA, 'nodeBB', nodeBB)
 
-    axios.patch('https://pydagoras.com:8000/items/A?value=' + nodeAA ,
+    axios.patch('https://' + BACK_END + '/items/A?value=' + nodeAA ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
 
-    axios.patch('https://pydagoras.com:8000/items/B?value=' + nodeBB ,
+    axios.patch('https://' + BACK_END + '/items/B?value=' + nodeBB ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
 
@@ -196,6 +203,9 @@ return (
     <>
       <p></p>
       <h1>pydagoras</h1>
+      <p>Click on the connect button below to connect to the backend. {SOCKET_URL_ONE}</p>
+      <p>Then look at the DAG images.</p>
+      <p>Input new values at the bottom of the page and see the updates in the DAGs.</p>
       <p>For full details of this site see <a href="https://markhallett.github.io/pydagoras/">pydagoras documentation</a> </p>
 
         <Row xs={2} md={4} lg={6}>
