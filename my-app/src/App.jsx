@@ -30,7 +30,7 @@ const GraphvizPage = (xx) => {
        return 'no connection';
   } else {
        xx = xx.slice(2,xx.length);
-       return <Graphviz dot={xx}/>;
+       return <Graphviz dot={xx} options={{height:200}}/>;
   }
 }
 
