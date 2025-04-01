@@ -24,13 +24,12 @@ const API_CALL = 'http://localhost:8000'
 
 const READY_STATE_OPEN = 1;
 
-
 const GraphvizPage = (xx) => {
   if (Object.is(xx, null)) { 
        return 'no connection';
   } else {
        xx = xx.slice(2,xx.length);
-       return <Graphviz dot={xx} options={{height:200}}/>;
+       return <Graphviz dot={xx} options={{height:200}} />;
   }
 }
 
@@ -203,6 +202,8 @@ const [nodeCC, setNodeCC] = useState(0);
 //      <p> {SOCKET_URL_ONE} </p>
 
 return ( 
+    <div style={{margin:"10px"}}>
+    {
     <>
       <p></p>
       <h1>pydagoras</h1>
@@ -237,6 +238,7 @@ return (
 
     <TabPanel>
     <Container>
+
       {GraphvizPage(messageHistoryA)}
 
       <br />
@@ -413,7 +415,9 @@ return (
     </TabPanel>
   </Tabs>
     </>
-  )
+  }
+  </div>
+  );
 }
 
 export default App
