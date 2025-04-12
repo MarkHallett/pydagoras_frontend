@@ -19,6 +19,7 @@ npm install react-tabs
 cp ../my-app/src/App.jsx src
 cp ../my-app/src/main.jsx src
 cp ../my-app/index.html .
+cp ../my-app/public/pydagoras.ico public
 
 cd mh
 npm run dev -- --host
