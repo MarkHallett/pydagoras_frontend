@@ -14,12 +14,12 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import 'react-tabs/style/react-tabs.css'
 
 // -----------------------------------------------------------
-const SOCKET_URL_ONE = 'ws://localhost:8000/ws/123';
-const API_CALL = 'http://localhost:8000'
+//const SOCKET_URL_ONE = 'ws://localhost:8000/ws/123';
+//const API_CALL = 'http://localhost:8000'
 
 
-//const SOCKET_URL_ONE = 'wss://pydagoras.com:8000/ws/123';
-//const API_CALL = 'https://pydagoras.com:8000'
+const SOCKET_URL_ONE = 'wss://pydagoras.com:8000/ws/123';
+const API_CALL = 'https://pydagoras.com:8000'
 // -----------------------------------------------------------
 
 const READY_STATE_OPEN = 1;
