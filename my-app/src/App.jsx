@@ -79,6 +79,11 @@ const handleKeyDown = (event) => {
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
 
+      if (event.target.id === 'nodeDD') {
+        axios.patch(API_CALL + '/items/D?value=' + event.target.value ,
+         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
+      }
+
 
     }
   }
@@ -179,7 +184,7 @@ function App() {
 
   const doSubmit3= (e) => {
     e.preventDefault();
-    console.log('Send all node values, nodeAA', nodeAA, 'nodeBB', nodeBB)
+    console.log('Send all node values, nodeAA', nodeAA, 'nodeBB', nodeBB, 'nodeDD', nodeDD)
 
     axios.patch('https://pydagoras.com:8000/items/A?value=' + nodeAA ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
@@ -189,6 +194,9 @@ function App() {
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
 
+    axios.patch(API_CALL + '/items/D?value=' + nodeDD ,
+    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
+    )
   }
 
 const [nodeA, setNodeA] = useState(0);
@@ -198,6 +206,7 @@ const [nodeC, setNodeC] = useState(0);
 const [nodeAA, setNodeAA] = useState(0);
 const [nodeBB, setNodeBB] = useState(0);
 const [nodeCC, setNodeCC] = useState(0);
+const [nodeDD, setNodeDD] = useState(0);
 	
 //      <p> {SOCKET_URL_ONE} </p>
 
@@ -209,6 +218,7 @@ return (
       <h1>pydagoras</h1>
 
       <p>Click on the connect button below to connect to the backend.</p>
+      <p> {SOCKET_URL_ONE} </p>
       <p>Then look at the DAG images.</p>
       <p>Input new values at the bottom of the page and see the updates in the DAGs.</p>
       <p>For full details of this site see <a href="https://markhallett.github.io/pydagoras/">pydagoras documentation</a> </p>
@@ -391,6 +401,19 @@ return (
                     placeholder="Node value" 
                     onKeyDown={handleKeyDown}
                     onChange={(e) => setNodeBB(e.target.value)}
+                /> 
+            </Col>
+        </Row>
+
+        <Row xs={2} md={4} lg={6}>
+          <Col>D</Col>
+          <Col> <Form.Control 
+                    id="nodeDD"
+                    type="number" 
+                    value={nodeValue}
+                    placeholder="Node value" 
+                    onKeyDown={handleKeyDown}
+                    onChange={(e) => setNodeDD(e.target.value)}
                 /> 
             </Col>
         </Row>
