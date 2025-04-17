@@ -218,7 +218,6 @@ return (
       <h1>pydagoras</h1>
 
       <p>Click on the connect button below to connect to the backend.</p>
-      <p> {SOCKET_URL_ONE} </p>
       <p>Then look at the DAG images.</p>
       <p>Input new values at the bottom of the page and see the updates in the DAGs.</p>
       <p>For full details of this site see <a href="https://markhallett.github.io/pydagoras/">pydagoras documentation</a> </p>
