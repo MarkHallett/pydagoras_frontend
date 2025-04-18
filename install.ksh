@@ -20,6 +20,7 @@ cp ../my-app/src/App.jsx src
 cp ../my-app/src/main.jsx src
 cp ../my-app/index.html .
 cp ../my-app/public/pydagoras.ico public
+cp ../my-app/vite.config.js .
 
-cd mh
-npm run dev -- --host
+cd 
+#npm run dev -- --host
