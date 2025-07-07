@@ -16,13 +16,12 @@ import { MaterialReactTable , useMaterialReactTable, } from 'material-react-tabl
 import { useMemo } from 'react';
 
 const start = Date.now();
-
-
 // -----------------------------------------------------------
-//const SOCKET_URL_ONE = 'ws://localhost:8000/ws/123';
-const SOCKET_URL_ONE = 'ws://localhost:8000/ws/' + start;
 const API_CALL = 'http://localhost:8000'
-const API_CALL_PATCHES = 'http://localhost:8000/patches'
+
+const SOCKET_URL_ONE = 'ws://localhost:8000/ws/' + start;
+const API_GET_PATCHES = API_CALL + '/patches'
+const API_GET_CONNECTIONS = API_CALL + '/connections'
 
 
 //const SOCKET_URL_ONE = 'wss://pydagoras.com:8000/ws/123';
@@ -30,16 +29,12 @@ const API_CALL_PATCHES = 'http://localhost:8000/patches'
 //const API_CALL = 'https://pydagoras.com:8000'
 // -----------------------------------------------------------
 
-
-const READY_STATE_OPEN = 1;
-
-const GraphvizPage = (xx) => {
-  if (Object.is(xx, null)) { 
+const GraphvizPage = (dag_str) => {
+  if (Object.is(dag_str, null)) { 
        return 'no connection';
   } else {
-       //xx = xx.slice(2,xx.length);
-       xx = xx.split(':')[1];
-       return <Graphviz dot={xx} options={{height:200}} />;
+       dag_str = dag_str.split(':')[1];
+       return <Graphviz dot={dag_str} options={{height:200}} />;
   }
 }
 
@@ -60,76 +55,52 @@ const handleKeyDown = (event) => {
       console.log('Send node/value', event.target.id, event.target.value)
 
       if (event.target.id === 'nodeA') {
-        axios.patch(API_CALL + '/items/gbp-usd?value=' + event.target.value +'&client_id=' + start ,
-         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
-      }
-
-      if (event.target.id === 'nodeB') {
-        axios.patch(API_CALL + '/items/usd-eur?value=' + event.target.value +'&client_id=' + start ,
-         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
-      }
-
-      if (event.target.id === 'nodeC') {
-        axios.patch(API_CALL + '/items/eur-gbp?value=' + event.target.value +'&client_id=' + start,
-         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
-      }
-
-      if (event.target.id === 'nodeAA') {
         axios.patch(API_CALL + '/items/A?value=' + event.target.value +'&client_id=' + start,
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
 
-      if (event.target.id === 'nodeBB') {
+      if (event.target.id === 'nodeB') {
         axios.patch(API_CALL + '/items/B?value=' + event.target.value +'&client_id=' + start,
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
 
-      if (event.target.id === 'nodeCC') {
+      if (event.target.id === 'nodeC') {
         axios.patch(API_CALL + '/items/C?value=' + event.target.value +'&client_id=' + start,
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
 
-      if (event.target.id === 'nodeDD') {
+      if (event.target.id === 'nodeD') {
         axios.patch(API_CALL + '/items/D?value=' + event.target.value +'&client_id=' + start,
+         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
+      }
+
+      if (event.target.id === 'node_gbp_usd') {
+        axios.patch(API_CALL + '/items/gbp-usd?value=' + event.target.value +'&client_id=' + start ,
+         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
+      }
+
+      if (event.target.id === 'node_usd_eur') {
+        axios.patch(API_CALL + '/items/usd-eur?value=' + event.target.value +'&client_id=' + start ,
+         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
+      }
+
+      if (event.target.id === 'node_eur_gbp') {
+        axios.patch(API_CALL + '/items/eur-gbp?value=' + event.target.value +'&client_id=' + start,
          { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
       }
     }
   }
 
 
-function Home() {
+function DAGs() {
 
-// const columns = useMemo(
-//   () => [
-//     {
-//       header: 'Name',
-//       accessorKey: 'name', //simple recommended way to define a column
-      //more column options can be added here to enable/disable features, customize look and feel, etc.
-      //optional custom cell render
-//       Cell: ({ row }) => (
-//         <Box sx={{ display: 'flex', gap: '2ch', alignItems: 'center' }}>
-//           <img src={row.original.imageUrl} />
-//           <a href={row.profileUrl}>{row.name}</a>
-//         </Box>
-//       ),
-//     },
-    //{
-    //  header: 'Value',
-    //  accessorFn: (dataRow) => parseInt(dataRow.age), //alternate way to access data if processing logic is needed
-    //},
-//   ],
-//   [],
-// );
-
-  const lowd = () => { setCurrentSocketUrl(generateAsyncUrlGetter(SOCKET_URL_ONE)) }
+  const connect_on_load = () => { setCurrentSocketUrl(generateAsyncUrlGetter(SOCKET_URL_ONE)) }
 
   const [currentSocketUrl, setCurrentSocketUrl] = useState(null);
   const [messageHistory, setMessageHistory] = useState(null);
-  const [messageHistoryA, setMessageHistoryA] = useState(null);
-  const [messageHistoryB, setMessageHistoryB] = useState(null);
-  const [messageHistoryC, setMessageHistoryC] = useState(null);
-  const [pageLoaded, setPageLoaded] = useState(false);
-
+  const [messageBasicDAG, setmessageBasicDAG] = useState(null);
+  const [messageDuplicateNodesDAG, setmessageDuplicateNodesDAG] = useState(null);
+  const [messageFxDAG, setmessageFxDAG] = useState(null);
   const { sendMessage, lastMessage, readyState, getWebSocket } = useWebSocket(
     currentSocketUrl,
     {
@@ -138,7 +109,6 @@ function Home() {
     }
   );
 
-  console.log('FFFFFFFFFFFF');
   useEffect(() => {
     lastMessage && setMessageHistory(lastMessage.data);
    
@@ -147,22 +117,20 @@ function Home() {
 
         if (lastMessage.data.split(':')[0] === 'BasicDAG' ){
                console.log("Found BasicDAG");
-               setMessageHistoryB(lastMessage.data) ;
+               setmessageBasicDAG(lastMessage.data) ;
         };
 
         if (lastMessage.data.split(':')[0] === 'DupNodes' ){
                console.log("Found DupNodes");
-               setMessageHistoryC(lastMessage.data) ;
+               setmessageDuplicateNodesDAG(lastMessage.data) ;
         };
 
         if (lastMessage.data.split(':')[0] === 'FX' ){
                console.log("Found FX");
-               setMessageHistoryA(lastMessage.data) ;
+               setmessageFxDAG(lastMessage.data) ;
         };
-
     };
-
-  }, [lastMessage, messageHistory, messageHistoryA, messageHistoryB, messageHistoryC ]);
+  }, [lastMessage, messageHistory, messageFxDAG, messageBasicDAG, messageDuplicateNodesDAG ]);
 
   const readyStateString = {
     0: 'CONNECTING',
@@ -171,67 +139,59 @@ function Home() {
     3: 'CLOSED',
   }[readyState];
 
+  const [toggleStatusBasic, setToggleStatusBasic] = useState(true)
+  const [toggleStatusDupNodes, setToggleStatusDupNodes] = useState(true)
+  const [toggleStatusFX, setToggleStatusFX] = useState(true)
 
-  const [toggleStatus, setToggleStatus] = useState(true)
   const [nodeValue, setNodeValue] = useState(null)
 
-  const [toggleStatus2, setToggleStatus2] = useState(true)
-  const [nodeValue2, setNodeValue2] = useState(null)
-
-  const [toggleStatus3, setToggleStatus3] = useState(true)
-  const [nodeValue3, setNodeValue3] = useState(null)
-
-  const sendValue= (e) => {
-    console.log("SEND SINGLE NODE VALUE")
-  }
-
-  const doSubmit= (e) => {
+  const doSubmitBasic= (e) => {
     e.preventDefault();
     console.log('Send all node values, nodeA', nodeA, 'nodeB', nodeB, 'nodeC', nodeC)
 
-    axios.patch(API_CALL + '/items/gbp-usd?value=' + nodeA ,
+    axios.patch(API_CALL + '/items/A?value=' + nodeA ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
 
-    axios.patch(API_CALL + '/items/usd-eur?value=' + nodeB ,
+    axios.patch(API_CALL + '/items/B?value=' + nodeB ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
 
-    axios.patch(API_CALL + '/items/eur-gbp?value=' + nodeC ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-  }
-
-  const doSubmit2= (e) => {
-    e.preventDefault();
-    console.log('Send all node values, nodeAA', nodeAA, 'nodeBB', nodeBB, 'nodeCC', nodeCC)
-
-    axios.patch(API_CALL + '/items/A?value=' + nodeAA ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-
-    axios.patch(API_CALL + '/items/B?value=' + nodeBB ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-
-    axios.patch(API_CALL + '/items/C?value=' + nodeCC ,
+    axios.patch(API_CALL + '/items/C?value=' + nodeC ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
   }
 
-  const doSubmit3= (e) => {
+  const doSubmitDupNodes= (e) => {
     e.preventDefault();
-    console.log('Send all node values, nodeAA', nodeAA, 'nodeBB', nodeBB, 'nodeDD', nodeDD)
+    console.log('Send all node values, nodeA', nodeA, 'nodeB', nodeB, 'nodeD', nodeD)
 
-    axios.patch('https://pydagoras.com:8000/items/A?value=' + nodeAA ,
+    axios.patch(API_CALL + '/items/A?value=' + nodeA ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
 
-    axios.patch('https://pydagoras.com:8000/items/B?value=' + nodeBB ,
+    axios.patch(API_CALL + '/items/B?value=' + nodeB ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
 
-    axios.patch(API_CALL + '/items/D?value=' + nodeDD ,
+    axios.patch(API_CALL + '/items/D?value=' + nodeD ,
+    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
+    )
+  }
+  
+  const doSubmitFX= (e) => {
+    e.preventDefault();
+    console.log('Send all node values, node_gbp_usd', node_gbp_usd, 'node_usd_eur', node_usd_eur, 'node_eur_gbp', node_eur_gbp)
+
+    axios.patch(API_CALL + '/items/gbp-usd?value=' + node_gbp_usd ,
+    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
+    )
+
+    axios.patch(API_CALL + '/items/usd-eur?value=' + node_usd_eur ,
+    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
+    )
+
+    axios.patch(API_CALL + '/items/eur-gbp?value=' + node_eur_gbp ,
     { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
     )
   }
@@ -239,23 +199,18 @@ function Home() {
 const [nodeA, setNodeA] = useState(0);
 const [nodeB, setNodeB] = useState(0);
 const [nodeC, setNodeC] = useState(0);
-
-const [nodeAA, setNodeAA] = useState(0);
-const [nodeBB, setNodeBB] = useState(0);
-const [nodeCC, setNodeCC] = useState(0);
-const [nodeDD, setNodeDD] = useState(0);
+const [nodeD, setNodeD] = useState(0);
 	
-// <body onload="setCurrentSocketUrl(generateAsyncUrlGetter(SOCKET_URL_ONE)">
-//      alert("Working MH")
-//        setCurrentSocketUrl(generateAsyncUrlGetter(SOCKET_URL_ONE))
+const [node_gbp_usd, setNodeGbpUsd] = useState(0);
+const [node_usd_eur, setNodeUsdEur] = useState(0);
+const [node_eur_gbp, setNodeEurGbp] = useState(0);
 
 useEffect(() => {
-    const handleLoad = () => setPageLoaded(true)
-    lowd()
+//    const handleLoad = () => setPageLoaded(true)
+    connect_on_load()
     console.log('loaded!!')
     },
     [])
-
 
 return ( 
     <div style={{margin:"10px"}}>
@@ -278,18 +233,18 @@ return (
 
         <TabPanel>
           <Container>
-           {GraphvizPage(messageHistoryB)}
+           {GraphvizPage(messageBasicDAG)}
           <br />
 
             <Row xs={2} md={4} lg={6}>
               <Col>A</Col>
               <Col> <Form.Control 
-                    id="nodeAA"
+                    id="nodeA"
                     type="number" 
                     value={nodeValue}
                     placeholder="Node value" 
                     onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeAA(e.target.value)}
+                    onChange={(e) => setNodeA(e.target.value)}
                     /> 
               </Col>
             </Row>
@@ -297,12 +252,12 @@ return (
         <Row xs={2} md={4} lg={6}>
           <Col>B</Col>
           <Col> <Form.Control 
-                    id="nodeBB"
+                    id="nodeB"
                     type="number" 
                     value={nodeValue}
                     placeholder="Node value" 
                     onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeBB(e.target.value)}
+                    onChange={(e) => setNodeB(e.target.value)}
                 /> 
             </Col>
         </Row>
@@ -310,12 +265,12 @@ return (
         <Row xs={2} md={4} lg={6}>
           <Col>C</Col>
           <Col> <Form.Control 
-                    id="nodeCC"
+                    id="nodeC"
                     type="number" 
                     value={nodeValue}
                     placeholder="Node value" 
                     onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeCC(e.target.value)}
+                    onChange={(e) => setNodeC(e.target.value)}
                 /> 
             </Col>
         </Row>
@@ -325,15 +280,15 @@ return (
             <Col> 
               <Form.Check
                   type="switch"
-                  label= {toggleStatus2 ? "Send individually" : "Send all"} 
-                  onClick = {() => setToggleStatus2(!toggleStatus2)}
+                  label= {toggleStatusDupNodes ? "Send individually" : "Send all"} 
+                  onClick = {() => setToggleStatusDupNodes(!toggleStatusDupNodes)}
                   />
             </Col>
           </Row>
 
           <Row xs={2} md={4} lg={6}>
             <Col> </Col>
-            <Col> <Button variant="primary" type="submit" disabled={toggleStatus2} onClick={doSubmit2}> Submit </Button> </Col>
+            <Col> <Button variant="primary" type="submit" disabled={toggleStatusDupNodes} onClick={doSubmitBasic}> Submit </Button> </Col>
           </Row>
 
 
@@ -342,18 +297,18 @@ return (
 
     <TabPanel>
       <Container>
-      {GraphvizPage(messageHistoryC)}
+      {GraphvizPage(messageDuplicateNodesDAG)}
       <br />
 
         <Row xs={2} md={4} lg={6}>
           <Col>A</Col>
           <Col> <Form.Control 
-                    id="nodeAA"
+                    id="nodeA"
                     type="number" 
                     value={nodeValue}
                     placeholder="Node value" 
                     onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeAA(e.target.value)}
+                    onChange={(e) => setNodeA(e.target.value)}
                 /> 
             </Col>
         </Row>
@@ -361,12 +316,12 @@ return (
         <Row xs={2} md={4} lg={6}>
           <Col>B</Col>
           <Col> <Form.Control 
-                    id="nodeBB"
+                    id="nodeB"
                     type="number" 
                     value={nodeValue}
                     placeholder="Node value" 
                     onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeBB(e.target.value)}
+                    onChange={(e) => setNodeB(e.target.value)}
                 /> 
             </Col>
         </Row>
@@ -374,12 +329,12 @@ return (
         <Row xs={2} md={4} lg={6}>
           <Col>D</Col>
           <Col> <Form.Control 
-                    id="nodeDD"
+                    id="nodeD"
                     type="number" 
                     value={nodeValue}
                     placeholder="Node value" 
                     onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeDD(e.target.value)}
+                    onChange={(e) => setNodeD(e.target.value)}
                 /> 
             </Col>
         </Row>
@@ -389,15 +344,15 @@ return (
             <Col> 
               <Form.Check
                   type="switch"
-                  label= {toggleStatus3 ? "Send individually" : "Send all"} 
-                  onClick = {() => setToggleStatus3(!toggleStatus3)}
+                  label= {toggleStatusBasic ? "Send individually" : "Send all"} 
+                  onClick = {() => setToggleStatusBasic(!toggleStatusBasic)}
                   />
             </Col>
           </Row>
 
           <Row xs={2} md={4} lg={6}>
             <Col> </Col>
-            <Col> <Button variant="primary" type="submit" disabled={toggleStatus3} onClick={doSubmit3}> Submit </Button> </Col>
+            <Col> <Button variant="primary" type="submit" disabled={toggleStatusBasic} onClick={doSubmitDupNodes}> Submit </Button> </Col>
           </Row>
 
       </Container>
@@ -405,73 +360,58 @@ return (
       
         <TabPanel>
           <Container>
-            {GraphvizPage(messageHistoryA)}
+            {GraphvizPage(messageFxDAG)}
             <br />
               <Row xs={2} md={4} lg={6}>
                 <Col>gbp-usd</Col>
                 <Col> <Form.Control 
-                    id="nodeA"
+                    id="node_gbp_usd"
                     type="number" 
                     value={nodeValue}
                     placeholder="Node value" 
                     onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeA(e.target.value)} /> 
+                    onChange={(e) => setNodeGbpUsd(e.target.value)} /> 
                 </Col>
               </Row>
               <Row xs={2} md={4} lg={6}>
                 <Col>usd-eur</Col>
                 <Col> <Form.Control 
-                    id="nodeB"
+                    id="node_usd_eur"
                     type="number" 
                     value={nodeValue}
                     placeholder="Node value" 
                     onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeB(e.target.value)} /> 
+                    onChange={(e) => setNodeUsdEur(e.target.value)} /> 
                 </Col>
               </Row>
 
               <Row xs={2} md={4} lg={6}>
                 <Col>eur-gbp</Col>
                 <Col> <Form.Control 
-                    id="nodeC"
+                    id="node_eur_gbp"
                     type="number" 
                     value={nodeValue}
                     placeholder="Node value" 
                     onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeC(e.target.value)} /> 
+                    onChange={(e) => setNodeEurGbp(e.target.value)} /> 
                 </Col>
               </Row>
               <Row xs={2} md={4} lg={6}>
                 <Col> </Col>
                 <Col> <Form.Check
                     type="switch"
-                    label= {toggleStatus ? "Send individually" : "Send all"} 
-                    onClick = {() => setToggleStatus(!toggleStatus)} />
+                    label= {toggleStatusFX ? "Send individually" : "Send all"} 
+                    onClick = {() => setToggleStatusFX(!toggleStatusFX)} />
                 </Col>
               </Row>
 
               <Row xs={2} md={4} lg={6}>
                 <Col> </Col>
-                <Col> <Button variant="primary" type="submit" disabled={toggleStatus} onClick={doSubmit}> Submit </Button> </Col>
+                <Col> <Button variant="primary" type="submit" disabled={toggleStatusFX} onClick={doSubmitFX}> Submit </Button> </Col>
               </Row>
             </Container>
           </TabPanel>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  </Tabs>
+    </Tabs>
   </>
   }
   </div>
@@ -484,7 +424,7 @@ function Connections() {
 
  useEffect(() => {
     // Simple API call
-    fetch('http://localhost:8000/connections')
+    fetch(API_GET_CONNECTIONS)
       .then(response => response.json())
       .then(data => setData(data))
       .catch(error => console.error('Error:', error));
@@ -552,13 +492,12 @@ function Updates() {
 
  useEffect(() => {
     // Simple API call
-    fetch('http://localhost:8000/patches')
+    //fetch('http://localhost:8000/patches')
+    fetch(API_GET_PATCHES)
       .then(response => response.json())
       .then(data => setData(data))
       .catch(error => console.error('Error:', error));
   }, []);
-  console.log('xxxxxxxxxxxxx')
-  console.log(users)  
 
   const columns = useMemo(
     () => [
@@ -576,7 +515,7 @@ function Updates() {
       },  
       {   
         accessorKey: "value", //simple recommended way to define a column
-        header: "Value1",
+        header: "Value",
         muiTableHeadCellProps: { sx: { color: "green" } }, //custom props
         Cell: ({ renderedCellValue }) => <strong>{renderedCellValue}</strong> //optional custom cell render
       },  
@@ -606,7 +545,7 @@ function Updates() {
     <div className="p-8">
       <h1>pydagoras</h1>
       <p> {SOCKET_URL_ONE} </p>
-      {API_CALL_PATCHES}
+      {API_GET_PATCHES}
 
       <h1 className="text-2xl font-bold mb-4">Inputs</h1>
       
@@ -679,7 +618,7 @@ function App() {
   };
 
   const routes = [
-    { path: '/', component: Home },
+    { path: '/', component: DAGs },
     { path: '/updates', component: Updates },
     { path: '/connections', component: Connections },
   ];
@@ -710,7 +649,7 @@ function App() {
       {/* Navigation */}
         <div className="flex items-center justify-between">
           <div>
-            <NavLink to="/">Home</NavLink>
+            <NavLink to="/">DAGs</NavLink>
             <NavLink to="/updates">Updates</NavLink>
             <NavLink to="/connections">Connections</NavLink>
           </div>
