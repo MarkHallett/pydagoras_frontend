@@ -16,18 +16,19 @@ import { MaterialReactTable , useMaterialReactTable, } from 'material-react-tabl
 import { useMemo } from 'react';
 
 const start = Date.now();
-// -----------------------------------------------------------
-const API_CALL = 'http://localhost:8000'
 
+// -----------------------------------------------------------
+//LOCAL
+const API_CALL = 'http://localhost:8000'
 const SOCKET_URL_ONE = 'ws://localhost:8000/ws/' + start;
+//
+// PROD
+//const API_CALL = 'https://pydagoras.com:8000'
+//const SOCKET_URL_ONE = 'wss://pydagoras.com:8000/ws/' + start;
+// -----------------------------------------------------------
+
 const API_GET_PATCHES = API_CALL + '/patches'
 const API_GET_CONNECTIONS = API_CALL + '/connections'
-
-
-//const SOCKET_URL_ONE = 'wss://pydagoras.com:8000/ws/123';
-//const SOCKET_URL_ONE = 'wss://pydagoras.com:8000/ws/' + start;
-//const API_CALL = 'https://pydagoras.com:8000'
-// -----------------------------------------------------------
 
 const GraphvizPage = (dag_str) => {
   if (Object.is(dag_str, null)) { 
@@ -48,7 +49,6 @@ const generateAsyncUrlGetter =
       }, timeout);
     });
   };
-
 
 const handleKeyDown = (event) => {
     if (event.key === 'Enter') {
