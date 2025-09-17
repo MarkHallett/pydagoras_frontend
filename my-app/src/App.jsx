@@ -219,7 +219,7 @@ return (
       <h1>pydagoras</h1>
       <p> {SOCKET_URL_ONE} </p>
       <p>Look at the DAG images below.</p>
-      <p>Input new values at the bottom of the page and see the updates in the DAGs.</p>
+      <p>Input new values press enter and see the DAG update.</p>
       <p>For full details of this site see <a href="https://markhallett.github.io/pydagoras/">pydagoras documentation</a> </p>
       <p>Connection Status {readyStateString} </p>
       <p>Basic examples</p>
@@ -640,8 +640,8 @@ function App() {
         <div className="flex items-center justify-between">
           <div>
             <NavLink to="/">DAGs</NavLink>
-            <NavLink to="/updates">Updates</NavLink>
-            <NavLink to="/connections">Connections</NavLink>
+            <NavLink to="/connections">Connections Log</NavLink>
+            <NavLink to="/updates">Updates Log</NavLink>
           </div>
         </div>
 
