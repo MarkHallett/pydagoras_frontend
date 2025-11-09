@@ -145,6 +145,38 @@ function DAGs() {
 
   const [nodeValue, setNodeValue] = useState(null)
 
+  const doSubmitA= (e) => {
+    e.preventDefault();
+    console.log('Send node value, nodeA', nodeA)
+    axios.patch(API_CALL + '/items/A?value=' + nodeA ,
+    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
+    )
+  }
+
+  const doSubmitB= (e) => {
+    e.preventDefault();
+    console.log('Send node value, nodeB', nodeB)
+    axios.patch(API_CALL + '/items/B?value=' + nodeB ,
+    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
+    )
+  }
+
+  const doSubmitC= (e) => {
+    e.preventDefault();
+    console.log('Send node value, nodeC', nodeC)
+    axios.patch(API_CALL + '/items/C?value=' + nodeC ,
+    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
+    )
+  }
+
+  const doSubmitD= (e) => {
+    e.preventDefault();
+    console.log('Send node value, nodeD', nodeD)
+    axios.patch(API_CALL + '/items/D?value=' + nodeD ,
+    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
+    )
+  }
+
   const doSubmitBasic= (e) => {
     e.preventDefault();
     console.log('Send all node values, nodeA', nodeA, 'nodeB', nodeB, 'nodeC', nodeC)
@@ -217,12 +249,9 @@ return (
     {
     <>
       <h1>pydagoras</h1>
-      <p> {SOCKET_URL_ONE} </p>
-      <p>Look at the DAG images below.</p>
       <p>Input new values press enter and see the DAG update.</p>
       <p>For full details of this site see <a href="https://markhallett.github.io/pydagoras/">pydagoras documentation</a> </p>
       <p>Connection Status {readyStateString} </p>
-      <p>Basic examples</p>
 
       <Tabs>
         <TabList>
@@ -246,6 +275,7 @@ return (
                     onChange={(e) => setNodeA(e.target.value)}
                     /> 
               </Col>
+              <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitA}> Update A </Button> </Col>
             </Row>
 
             <Row xs={2} md={4} lg={6}>
@@ -259,6 +289,7 @@ return (
                     onChange={(e) => setNodeB(e.target.value)}
                 /> 
               </Col>
+              <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitB}> Update B </Button> </Col>
             </Row>
 
             <Row xs={2} md={4} lg={6}>
@@ -272,25 +303,20 @@ return (
                     onChange={(e) => setNodeC(e.target.value)}
                 /> 
               </Col>
+              <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitC}> Update C </Button> </Col>
             </Row>
 	
             <Row xs={2} md={4} lg={6}>
               <Col> </Col>
-              <Col> 
-              <Form.Check
-                  type="switch"
-                  label= {toggleStatusDupNodes ? "Send individually" : "Send all"} 
-                  onClick = {() => setToggleStatusDupNodes(!toggleStatusDupNodes)}
-                  />
-              </Col>
             </Row>
-
+            <br />
             <Row xs={2} md={4} lg={6}>
               <Col> </Col>
-              <Col> <Button variant="primary" type="submit" disabled={toggleStatusDupNodes} onClick={doSubmitBasic}> Submit </Button> </Col>
+              <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitBasic}> Update All</Button> </Col>
             </Row>
           </Container>
         </TabPanel>
+        <br />
 
         <TabPanel>
           <Container>
@@ -308,6 +334,7 @@ return (
                     onChange={(e) => setNodeA(e.target.value)}
                 /> 
             </Col>
+            <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitA}> Update A </Button> </Col>
         </Row>
 
         <Row xs={2} md={4} lg={6}>
@@ -321,6 +348,7 @@ return (
                     onChange={(e) => setNodeB(e.target.value)}
                 /> 
             </Col>
+            <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitB}> Update B </Button> </Col>
         </Row>
 
         <Row xs={2} md={4} lg={6}>
@@ -334,23 +362,18 @@ return (
                     onChange={(e) => setNodeD(e.target.value)}
                 /> 
             </Col>
+            <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitD}> Update D </Button> </Col>
         </Row>
 
           <Row xs={2} md={4} lg={6}>
             <Col> </Col>
-            <Col> 
-              <Form.Check
-                  type="switch"
-                  label= {toggleStatusBasic ? "Send individually" : "Send all"} 
-                  onClick = {() => setToggleStatusBasic(!toggleStatusBasic)}
-                  />
-            </Col>
           </Row>
-
+          <br/>
           <Row xs={2} md={4} lg={6}>
             <Col> </Col>
-            <Col> <Button variant="primary" type="submit" disabled={toggleStatusBasic} onClick={doSubmitDupNodes}> Submit </Button> </Col>
+            <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitDupNodes}> Update All </Button> </Col>
           </Row>
+          <br/>
 
       </Container>
     </TabPanel>
@@ -394,18 +417,14 @@ return (
                 </Col>
               </Row>
               <Row xs={2} md={4} lg={6}>
-                <Col> </Col>
-                <Col> <Form.Check
-                    type="switch"
-                    label= {toggleStatusFX ? "Send individually" : "Send all"} 
-                    onClick = {() => setToggleStatusFX(!toggleStatusFX)} />
-                </Col>
               </Row>
 
+              <br />
               <Row xs={2} md={4} lg={6}>
                 <Col> </Col>
-                <Col> <Button variant="primary" type="submit" disabled={toggleStatusFX} onClick={doSubmitFX}> Submit </Button> </Col>
+                <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitFX}> Update All </Button> </Col>
               </Row>
+              <br />
             </Container>
           </TabPanel>
     </Tabs>
