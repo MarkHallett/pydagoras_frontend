@@ -265,7 +265,7 @@ return (
            {GraphvizPage(messageBasicDAG)}
            <br />
             <Row xs={2} md={4} lg={6}>
-              <Col>A</Col>
+              <Col  style={{ width: '15px' }} >A</Col>
               <Col> <Form.Control 
                     id="nodeA"
                     type="number" 
@@ -279,7 +279,7 @@ return (
             </Row>
 
             <Row xs={2} md={4} lg={6}>
-              <Col>B</Col>
+              <Col  style={{ width: '15px' }} >B</Col>
                 <Col> <Form.Control 
                     id="nodeB"
                     type="number" 
@@ -293,7 +293,7 @@ return (
             </Row>
 
             <Row xs={2} md={4} lg={6}>
-              <Col>C</Col>
+              <Col  style={{ width: '15px' }} >C</Col>
               <Col> <Form.Control 
                     id="nodeC"
                     type="number" 
@@ -311,7 +311,6 @@ return (
             </Row>
             <br />
             <Row xs={2} md={4} lg={6}>
-              <Col> </Col>
               <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitBasic}> Update All</Button> </Col>
             </Row>
           </Container>
@@ -324,7 +323,7 @@ return (
            <br />
 
         <Row xs={2} md={4} lg={6}>
-          <Col>A</Col>
+          <Col  style={{ width: '15px' }} >A</Col>
           <Col> <Form.Control 
                     id="nodeA"
                     type="number" 
@@ -338,7 +337,7 @@ return (
         </Row>
 
         <Row xs={2} md={4} lg={6}>
-          <Col>B</Col>
+          <Col  style={{ width: '15px' }} >B</Col>
           <Col> <Form.Control 
                     id="nodeB"
                     type="number" 
@@ -352,7 +351,7 @@ return (
         </Row>
 
         <Row xs={2} md={4} lg={6}>
-          <Col>D</Col>
+          <Col  style={{ width: '15px' }} >D</Col>
           <Col> <Form.Control 
                     id="nodeD"
                     type="number" 
@@ -370,7 +369,6 @@ return (
           </Row>
           <br/>
           <Row xs={2} md={4} lg={6}>
-            <Col> </Col>
             <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitDupNodes}> Update All </Button> </Col>
           </Row>
           <br/>
@@ -421,7 +419,6 @@ return (
 
               <br />
               <Row xs={2} md={4} lg={6}>
-                <Col> </Col>
                 <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitFX}> Update All </Button> </Col>
               </Row>
               <br />
