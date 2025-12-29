@@ -24,8 +24,8 @@ export default defineConfig({
      server: {
        port: 443,
 //       https: {
-//         cert: 'certs/www_pydagoras_com.crt',
-//         key: 'certs/www_pydagoras_com.key'
+//         cert: '../../../../certs/www_pydagoras_com.crt',
+//         key: '../../../../certs/www_pydagoras_com.key'
 //       }
      }
 
