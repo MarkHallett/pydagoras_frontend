@@ -1,12 +1,5 @@
 # install.ksh
 echo "install.ksh"
-# TODO add date to app dir
-# TODO use env vars
-
-# change vit_config.js - certs
-# change App.jsx - local host and websocket
-
-echo "install.ksh"
 
 # create base app
 npm create vite pydagoras -- --template react
@@ -32,5 +25,8 @@ cp ../my-app/index.html .
 cp ../my-app/public/pydagoras.ico public
 cp ../my-app/vite.config.js .
 
+echo ""
+echo "now ..."
+echo "cd pydagoras"
 echo "npm run dev -- --host"
 
