@@ -26,17 +26,26 @@ import TabContext from '@mui/lab/TabContext';
 const start = Date.now();
 
 // -----------------------------------------------------------
-//LOCAL
-const API_CALL = 'http://localhost:8000'
-const SOCKET_URL_ONE = 'ws://localhost:8000/ws/' + start;
-//
-// PROD
-//const API_CALL = 'https://pydagoras.com:8000'
-//const SOCKET_URL_ONE = 'wss://pydagoras.com:8000/ws/' + start;
+const GetAPI_CALL = () => {
+  if (process.env.NODE_ENV === 'production') {
+       return 'https://pydagoras.com:8000'
+  }
+  return 'http://localhost:8000'
+}
+
+const GetSOCKET_URL_ONE = () => {
+  if (process.env.NODE_ENV === 'production') {
+       return 'wss://pydagoras.com:8000/ws/' + start;
+  }
+  return 'ws://localhost:8000/ws/' + start;
+}
+
+const API_CALL = GetAPI_CALL();
+const SOCKET_URL_ONE = GetSOCKET_URL_ONE();
+console.log('NODE ENV', process.env.NODE_ENV);
+
 // -----------------------------------------------------------
 
-const API_GET_PATCHES = API_CALL + '/patches'
-const API_GET_CONNECTIONS = API_CALL + '/connections'
 
 const GraphvizPage = (dag_str) => {
   if (Object.is(dag_str, null)) { 
@@ -270,6 +279,7 @@ return (
     <div style={{margin:"10px"}}>
     {
     <>
+    {process.env.NODE_ENV}
       <h1>pydagoras</h1>
       <p>Input new values press enter and see the DAG update.</p>
       <p>For full details of this site see <a href="https://markhallett.github.io/pydagoras/">pydagoras documentation</a> </p>
