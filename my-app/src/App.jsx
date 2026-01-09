@@ -10,25 +10,42 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
-import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 import 'react-tabs/style/react-tabs.css'
 import { MaterialReactTable , useMaterialReactTable, } from 'material-react-table'
 import { useMemo } from 'react';
 
+import * as React from 'react';
+import Box from '@mui/material/Box';
+import Tab from '@mui/material/Tab';
+import TabList from '@mui/lab/TabList';
+import TabPanel from '@mui/lab/TabPanel';
+import TabContext from '@mui/lab/TabContext';
+
+//import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
+
 const start = Date.now();
 
 // -----------------------------------------------------------
-//LOCAL
-const API_CALL = 'http://localhost:8000'
-const SOCKET_URL_ONE = 'ws://localhost:8000/ws/' + start;
-//
-// PROD
-//const API_CALL = 'https://pydagoras.com:8000'
-//const SOCKET_URL_ONE = 'wss://pydagoras.com:8000/ws/' + start;
+const GetAPI_CALL = () => {
+  if (process.env.NODE_ENV === 'production') {
+       return 'https://pydagoras.com:8000'
+  }
+  return 'http://localhost:8000'
+}
+
+const GetSOCKET_URL_ONE = () => {
+  if (process.env.NODE_ENV === 'production') {
+       return 'wss://pydagoras.com:8000/ws/' + start;
+  }
+  return 'ws://localhost:8000/ws/' + start;
+}
+
+const API_CALL = GetAPI_CALL();
+const SOCKET_URL_ONE = GetSOCKET_URL_ONE();
+console.log('NODE ENV', process.env.NODE_ENV);
+
 // -----------------------------------------------------------
 
-const API_GET_PATCHES = API_CALL + '/patches'
-const API_GET_CONNECTIONS = API_CALL + '/connections'
 
 const GraphvizPage = (dag_str) => {
   if (Object.is(dag_str, null)) { 
@@ -38,6 +55,11 @@ const GraphvizPage = (dag_str) => {
        return <Graphviz dot={dag_str} options={{height:200}} />;
   }
 }
+
+const MHTest = () => {
+  return "{messageBasicDAG}"
+}
+
 
 //Generates the click handler, which returns a promise that resovles to the provided url.
 const generateAsyncUrlGetter =
@@ -237,6 +259,13 @@ const [node_gbp_usd, setNodeGbpUsd] = useState(0);
 const [node_usd_eur, setNodeUsdEur] = useState(0);
 const [node_eur_gbp, setNodeEurGbp] = useState(0);
 
+
+
+// NEW
+const [value, setValue] = useState('1')
+const handleChange = (event, newValue) => { setValue(newValue);
+};
+
 useEffect(() => {
 //    const handleLoad = () => setPageLoaded(true)
     connect_on_load()
@@ -244,191 +273,36 @@ useEffect(() => {
     },
     [])
 
+
+
 return ( 
     <div style={{margin:"10px"}}>
     {
     <>
+    {process.env.NODE_ENV}
       <h1>pydagoras</h1>
       <p>Input new values press enter and see the DAG update.</p>
       <p>For full details of this site see <a href="https://markhallett.github.io/pydagoras/">pydagoras documentation</a> </p>
       <p>Connection Status {readyStateString} </p>
-
-      <Tabs>
-        <TabList>
-          <Tab>Basic</Tab>
-          <Tab>Duplicate nodes</Tab>
-          <Tab>FX</Tab>
-        </TabList>
-
-        <TabPanel>
-          <Container>
-           {GraphvizPage(messageBasicDAG)}
-           <br />
-            <Row xs={2} md={4} lg={6}>
-              <Col  style={{ width: '15px' }} >A</Col>
-              <Col> <Form.Control 
-                    id="nodeA"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeA(e.target.value)}
-                    /> 
-              </Col>
-              <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitA}> Update A </Button> </Col>
-            </Row>
-
-            <Row xs={2} md={4} lg={6}>
-              <Col  style={{ width: '15px' }} >B</Col>
-                <Col> <Form.Control 
-                    id="nodeB"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeB(e.target.value)}
-                /> 
-              </Col>
-              <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitB}> Update B </Button> </Col>
-            </Row>
-
-            <Row xs={2} md={4} lg={6}>
-              <Col  style={{ width: '15px' }} >C</Col>
-              <Col> <Form.Control 
-                    id="nodeC"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeC(e.target.value)}
-                /> 
-              </Col>
-              <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitC}> Update C </Button> </Col>
-            </Row>
-	
-            <Row xs={2} md={4} lg={6}>
-              <Col> </Col>
-            </Row>
-            <br />
-            <Row xs={2} md={4} lg={6}>
-              <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitBasic}> Update All</Button> </Col>
-            </Row>
-          </Container>
-        </TabPanel>
-        <br />
-
-        <TabPanel>
-          <Container>
-            {GraphvizPage(messageDuplicateNodesDAG)}
-           <br />
-
-        <Row xs={2} md={4} lg={6}>
-          <Col  style={{ width: '15px' }} >A</Col>
-          <Col> <Form.Control 
-                    id="nodeA"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeA(e.target.value)}
-                /> 
-            </Col>
-            <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitA}> Update A </Button> </Col>
-        </Row>
-
-        <Row xs={2} md={4} lg={6}>
-          <Col  style={{ width: '15px' }} >B</Col>
-          <Col> <Form.Control 
-                    id="nodeB"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeB(e.target.value)}
-                /> 
-            </Col>
-            <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitB}> Update B </Button> </Col>
-        </Row>
-
-        <Row xs={2} md={4} lg={6}>
-          <Col  style={{ width: '15px' }} >D</Col>
-          <Col> <Form.Control 
-                    id="nodeD"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeD(e.target.value)}
-                /> 
-            </Col>
-            <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitD}> Update D </Button> </Col>
-        </Row>
-
-          <Row xs={2} md={4} lg={6}>
-            <Col> </Col>
-          </Row>
-          <br/>
-          <Row xs={2} md={4} lg={6}>
-            <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitDupNodes}> Update All </Button> </Col>
-          </Row>
-          <br/>
-
-      </Container>
-    </TabPanel>
       
-        <TabPanel>
-          <Container>
-            {GraphvizPage(messageFxDAG)}
-            <br />
-              <Row xs={2} md={4} lg={6}>
-                <Col>gbp-usd</Col>
-                <Col> <Form.Control 
-                    id="node_gbp_usd"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeGbpUsd(e.target.value)} /> 
-                </Col>
-              </Row>
-              <Row xs={2} md={4} lg={6}>
-                <Col>usd-eur</Col>
-                <Col> <Form.Control 
-                    id="node_usd_eur"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeUsdEur(e.target.value)} /> 
-                </Col>
-              </Row>
-
-              <Row xs={2} md={4} lg={6}>
-                <Col>eur-gbp</Col>
-                <Col> <Form.Control 
-                    id="node_eur_gbp"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeEurGbp(e.target.value)} /> 
-                </Col>
-              </Row>
-              <Row xs={2} md={4} lg={6}>
-              </Row>
-
-              <br />
-              <Row xs={2} md={4} lg={6}>
-                <Col> <Button size="sm" variant="primary" type="submit" onClick={doSubmitFX}> Update All </Button> </Col>
-              </Row>
-              <br />
-            </Container>
-          </TabPanel>
-    </Tabs>
-  </>
-  }
-  </div>
-);
+      <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <TabContext value={value}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+            <TabList onChange={handleChange} aria-label="lab API tabs example">
+              <Tab label="Basic DAG" value="1" />
+              <Tab label="Duplicate nodes" value="2" />
+              <Tab label="FX DAG" value="3" />
+            </TabList>
+            </Box>
+            <TabPanel value="1">{GraphvizPage(messageBasicDAG)}</TabPanel>
+            <TabPanel value="2">{GraphvizPage(messageDuplicateNodesDAG)}</TabPanel>
+            <TabPanel value="3">{GraphvizPage(messageFxDAG)}</TabPanel>
+          </TabContext>
+      </Box>
+    </>
+    }
+    </div>
+  );
 }
 
 function Connections() {
