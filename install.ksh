@@ -12,13 +12,14 @@ npm install graphviz-react
 npm install typescript --save-dev
 npm install react-hook-form
 npm install bootstrap
-#npm install react-tabs
 npm install react-router-dom
 npm install material-react-table
 npm install @mui/material 
 npm install @emotion/react 
 npm install @emotion/styled
 npm install @mui/lab
+npm install react-bootstrap
+npm install react-tabs
 
 # update the basic app area with the pydagoras files
 
