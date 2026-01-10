@@ -46,6 +46,8 @@ console.log('NODE ENV', process.env.NODE_ENV);
 
 // -----------------------------------------------------------
 
+const API_GET_PATCHES = API_CALL + '/patches'
+const API_GET_CONNECTIONS = API_CALL + '/connections'
 
 const GraphvizPage = (dag_str) => {
   if (Object.is(dag_str, null)) { 
