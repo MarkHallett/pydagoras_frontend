@@ -4,7 +4,6 @@ import useWebSocket from 'react-use-websocket';
 import { Graphviz } from 'graphviz-react';
 
 import { useState, useEffect } from 'react'
-
 import { Form, Button } from "react-bootstrap";
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -20,8 +19,6 @@ import Tab from '@mui/material/Tab';
 import TabList from '@mui/lab/TabList';
 import TabPanel from '@mui/lab/TabPanel';
 import TabContext from '@mui/lab/TabContext';
-
-//import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
 
 const start = Date.now();
 
@@ -56,10 +53,6 @@ const GraphvizPage = (dag_str) => {
        dag_str = dag_str.split(':')[1];
        return <Graphviz dot={dag_str} options={{height:200}} />;
   }
-}
-
-const MHTest = () => {
-  return "{messageBasicDAG}"
 }
 
 
@@ -201,6 +194,30 @@ function DAGs() {
     )
   }
 
+  const doSubmitGbpUsd= (e) => {  
+    e.preventDefault();
+    console.log('Send node value, node_gbp_usd', node_gbp_usd)
+    axios.patch(API_CALL + '/items/gbp-usd?value=' + node_gbp_usd ,
+    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
+    )
+  }
+  
+  const doSubmitUsdEur= (e) => {
+    e.preventDefault();
+    console.log('Send node value, node_usd_eur', node_usd_eur)
+    axios.patch(API_CALL + '/items/usd-eur?value=' + node_usd_eur ,
+    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
+    )
+  }
+
+  const doSubmitEurGbp= (e) => {
+    e.preventDefault();
+    console.log('Send node value, node_eur_gbp', node_eur_gbp)
+    axios.patch(API_CALL + '/items/eur-gbp?value=' + node_eur_gbp ,
+    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
+    )
+  }
+
   const doSubmitBasic= (e) => {
     e.preventDefault();
     console.log('Send all node values, nodeA', nodeA, 'nodeB', nodeB, 'nodeC', nodeC)
@@ -252,14 +269,14 @@ function DAGs() {
     )
   }
 
-const [nodeA, setNodeA] = useState(0);
-const [nodeB, setNodeB] = useState(0);
-const [nodeC, setNodeC] = useState(0);
-const [nodeD, setNodeD] = useState(0);
+const [nodeA, setNodeA] = useState('');
+const [nodeB, setNodeB] = useState('');
+const [nodeC, setNodeC] = useState('');
+const [nodeD, setNodeD] = useState('');
 	
-const [node_gbp_usd, setNodeGbpUsd] = useState(0);
-const [node_usd_eur, setNodeUsdEur] = useState(0);
-const [node_eur_gbp, setNodeEurGbp] = useState(0);
+const [node_gbp_usd, setNodeGbpUsd] = useState('');
+const [node_usd_eur, setNodeUsdEur] = useState('');
+const [node_eur_gbp, setNodeEurGbp] = useState('');
 
 
 
@@ -276,6 +293,31 @@ useEffect(() => {
     [])
 
 
+// Reusable row for node input + optional per-node update button
+const NodeRow = ({ label, id, value, setValue, onSubmit, showButton = true }) => (
+  <Row xs={2} md={4} lg={6}>
+    <Col style={{ width: '100px' }}>
+      {label}
+    </Col>
+    <Col style={{ width: '200px', paddingRight: '50px' }} >
+      <Form.Control
+        id={id} type="number" value={value} placeholder="Node value" onKeyDown={handleKeyDown}
+        onChange={(e) => setValue(e.target.value)}
+      />
+    </Col>
+    <Col style={{ paddingLeft: '0px'}}> 
+      {showButton && ( <Button size="sm" variant="primary" type="submit" onClick={onSubmit}> Update {label} </Button>)} 
+    </Col>
+  </Row>
+);
+
+const UpdateAll = ({ onSubmit }) => (
+  <Row xs={2} md={4} lg={6}>
+    <Col> 
+      <Button size="sm" variant="primary" type="submit" onClick={onSubmit}> Update All </Button> 
+    </Col>
+  </Row>
+);
 
 return ( 
     <div style={{margin:"10px"}}>
@@ -295,202 +337,36 @@ return (
               <Tab label="Duplicate nodes" value="2" />
               <Tab label="FX DAG" value="3" />
             </TabList>
-            </Box>
-            <TabPanel value="1">
-              {GraphvizPage(messageBasicDAG)}
-              <br />
-              <Row xs={2} md={4} lg={6}>
-                <Col  style={{ width: '15px' }} >A</Col>
-                <Col> <Form.Control 
-                    id="nodeA"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeA(e.target.value)}
-                    /> 
-                </Col>
-                <Col> <Button size="sm" 
-                    variant="primary" 
-                    type="submit" 
-                    onClick={doSubmitA}> Update A </Button> 
-                </Col>
-              </Row>
+          </Box>
 
-              <Row xs={2} md={4} lg={6}>
-                <Col  style={{ width: '15px' }} >B</Col>
-                <Col> <Form.Control 
-                    id="nodeB"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeB(e.target.value)}
-                    /> 
-                </Col>
-                <Col> 
-                  <Button size="sm" 
-                          variant="primary" 
-                          type="submit" 
-                          onClick={doSubmitB}> Update B </Button> </Col>
-              </Row>
-
-              <Row xs={2} md={4} lg={6}>
-              <Col  style={{ width: '15px' }} >C</Col>
-              <Col> <Form.Control 
-                    id="nodeC"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeC(e.target.value)}
-                /> 
-              </Col>
-              <Col> 
-                <Button size="sm" 
-                    variant="primary" 
-                    type="submit" 
-                    onClick={doSubmitC}> 
-                    Update C 
-                </Button> 
-              </Col>
-            </Row>
-
-            <Row xs={2} md={4} lg={6}>
-              <Col> 
-              </Col>
-              </Row>
-              <br />
-              <Row xs={2} md={4} lg={6}>
-                <Col> 
-                  <Button size="sm" 
-                     variant="primary" 
-                     type="submit" 
-                     onClick={doSubmitBasic}> Update All
-                  </Button> 
-                </Col>
-              </Row>	
-            </TabPanel>
-
-            <TabPanel value="2">{GraphvizPage(messageDuplicateNodesDAG)}
-              <Row xs={2} md={4} lg={6}>
-                <Col  style={{ width: '15px' }} >A</Col>
-                <Col> <Form.Control 
-                    id="nodeA"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeA(e.target.value)} /> 
-                </Col>
-                <Col> <Button size="sm" 
-                              variant="primary" 
-                              type="submit" 
-                              onClick={doSubmitA}> 
-                              Update A </Button> 
-                </Col>
-              </Row>
-
-              <Row xs={2} md={4} lg={6}>
-                <Col  style={{ width: '15px' }} >B</Col>
-                <Col> <Form.Control 
-                    id="nodeB"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeB(e.target.value)} /> 
-                </Col>
-                <Col> <Button size="sm" 
-                              variant="primary" 
-                              type="submit" 
-                              onClick={doSubmitB}> 
-                              Update B 
-                      </Button> 
-                </Col>
-              </Row>
-
-              <Row xs={2} md={4} lg={6}>
-                <Col  style={{ width: '15px' }} >D</Col>
-                <Col> <Form.Control 
-                          id="nodeD"
-                          type="number" 
-                          value={nodeValue}
-                          placeholder="Node value" 
-                          onKeyDown={handleKeyDown}
-                          onChange={(e) => setNodeD(e.target.value)} /> 
-                </Col>
-                <Col> <Button size="sm" 
-                              variant="primary" 
-                              type="submit" 
-                              onClick={doSubmitD}> 
-                              Update D 
-                      </Button> 
-                </Col>
-              </Row>
-
-              <Row xs={2} md={4} lg={6}>
-                <Col> </Col>
-              </Row>
-              <br/>
-              <Row xs={2} md={4} lg={6}>
-                <Col> <Button size="sm" 
-                              variant="primary" 
-                              type="submit" 
-                              onClick={doSubmitDupNodes}> Update All 
-                      </Button> 
-                </Col>
-              </Row>
-            </TabPanel>
-
-            <TabPanel value="3">{GraphvizPage(messageFxDAG)}
-              <Row xs={2} md={4} lg={6}>
-                <Col>gbp-usd</Col>
-                <Col> <Form.Control 
-                    id="node_gbp_usd"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeGbpUsd(e.target.value)} /> 
-                </Col>
-              </Row>
-              <Row xs={2} md={4} lg={6}>
-                <Col>usd-eur</Col>
-                <Col> <Form.Control 
-                    id="node_usd_eur"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeUsdEur(e.target.value)} /> 
-                </Col>
-              </Row>
-
-              <Row xs={2} md={4} lg={6}>
-                <Col>eur-gbp</Col>
-                <Col> <Form.Control 
-                    id="node_eur_gbp"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeEurGbp(e.target.value)} /> 
-                </Col>
-              </Row>
-              <br />
-              <Row xs={2} md={4} lg={6}>
-                <Col> <Button size="sm" 
-                              variant="primary" 
-                              type="submit" 
-                              onClick={doSubmitFX}> Update All 
-                      </Button> 
-                </Col>
-              </Row>
+          <TabPanel value="1">
+            {GraphvizPage(messageBasicDAG)}
+            <br />
+            <NodeRow label="A" id="nodeA" value={nodeA} setValue={setNodeA} onSubmit={doSubmitA} />
+            <NodeRow label="B" id="nodeB" value={nodeB} setValue={setNodeB} onSubmit={doSubmitB} />
+            <NodeRow label="C" id="nodeC" value={nodeC} setValue={setNodeC} onSubmit={doSubmitC} />
+            <br />
+            <UpdateAll onSubmit={doSubmitBasic} />
           </TabPanel>
 
+          <TabPanel value="2">{GraphvizPage(messageDuplicateNodesDAG)}
+            <br />
+            <NodeRow label="A" id="nodeA" value={nodeA} setValue={setNodeA} onSubmit={doSubmitA} />
+            <NodeRow label="B" id="nodeB" value={nodeB} setValue={setNodeB} onSubmit={doSubmitB} />
+            <NodeRow label="D" id="nodeD" value={nodeD} setValue={setNodeD} onSubmit={doSubmitD} />
+            <br />
+            <UpdateAll onSubmit={doSubmitDupNodes} />
+          </TabPanel>
 
-          </TabContext>
+          <TabPanel value="3">{GraphvizPage(messageFxDAG)}
+            <br />
+            <NodeRow label="gbp_usd" id="node_gbp_usd" value={node_gbp_usd} setValue={setNodeGbpUsd} onSubmit={doSubmitGbpUsd} />
+            <NodeRow label="usd_eur" id="node_usd_eur" value={node_usd_eur} setValue={setNodeUsdEur} onSubmit={doSubmitUsdEur} />
+            <NodeRow label="eur_gbp" id="node_eur_gbp" value={node_eur_gbp} setValue={setNodeEurGbp} onSubmit={doSubmitEurGbp} />
+            <br />
+            <UpdateAll onSubmit={doSubmitFX} />
+          </TabPanel>
+        </TabContext>
       </Box>
     </>
     }
