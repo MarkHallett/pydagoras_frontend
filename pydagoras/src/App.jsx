@@ -3,10 +3,8 @@ import axios from 'axios'
 import useWebSocket from 'react-use-websocket';
 import { Graphviz } from 'graphviz-react';
 
-import { useState, useEffect } from 'react'
-
+import { useState, useEffect, useCallback } from 'react'
 import { Form, Button } from "react-bootstrap";
-import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
@@ -56,10 +54,6 @@ const GraphvizPage = (dag_str) => {
   }
 }
 
-const MHTest = () => {
-  return "{messageBasicDAG}"
-}
-
 
 //Generates the click handler, which returns a promise that resovles to the provided url.
 const generateAsyncUrlGetter =
@@ -72,51 +66,45 @@ const generateAsyncUrlGetter =
     });
   };
 
-const handleKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      console.log('Send node/value', event.target.id, event.target.value)
+const itemMap = {
+  nodeA: 'A',
+  nodeB: 'B',
+  nodeC: 'C',
+  nodeD: 'D',
+  node_gbp_usd: 'gbp-usd',
+  node_usd_eur: 'usd-eur',
+  node_eur_gbp: 'eur-gbp'
+};
 
-      if (event.target.id === 'nodeA') {
-        axios.patch(API_CALL + '/items/A?value=' + event.target.value +'&client_id=' + start,
-         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
-      }
 
-      if (event.target.id === 'nodeB') {
-        axios.patch(API_CALL + '/items/B?value=' + event.target.value +'&client_id=' + start,
-         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
-      }
+// Reusable row for node input + optional per-node update button - defined OUTSIDE component
+const NodeRow = React.memo(({ label, id, value, setValue, onSubmit, handleKeyDown, showButton = true }) => (
+  <Row xs={2} md={4} lg={6}>
+    <Col style={{ width: '100px' }}>
+      {label}
+    </Col>
+    <Col>
+      <Form.Control
+        id={id} type="number" value={value} placeholder="Node value" onKeyDown={handleKeyDown}
+        onChange={(e) => setValue(e.target.value)}
+        style={{ width: '150px' }}
+      />
+    </Col>
+    <Col style={{ paddingLeft: '0px'}}> 
+      {showButton && ( <Button size="sm" variant="primary" type="button" onClick={onSubmit}> Update {label} </Button>)} 
+    </Col>
+  </Row>
+));
 
-      if (event.target.id === 'nodeC') {
-        axios.patch(API_CALL + '/items/C?value=' + event.target.value +'&client_id=' + start,
-         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
-      }
-
-      if (event.target.id === 'nodeD') {
-        axios.patch(API_CALL + '/items/D?value=' + event.target.value +'&client_id=' + start,
-         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
-      }
-
-      if (event.target.id === 'node_gbp_usd') {
-        axios.patch(API_CALL + '/items/gbp-usd?value=' + event.target.value +'&client_id=' + start ,
-         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
-      }
-
-      if (event.target.id === 'node_usd_eur') {
-        axios.patch(API_CALL + '/items/usd-eur?value=' + event.target.value +'&client_id=' + start ,
-         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
-      }
-
-      if (event.target.id === 'node_eur_gbp') {
-        axios.patch(API_CALL + '/items/eur-gbp?value=' + event.target.value +'&client_id=' + start,
-         { headers: { 'Content-Type': 'application/json; charset=utf-8', } })
-      }
-    }
-  }
-
+const UpdateAll = React.memo(({ onSubmit }) => (
+  <Row xs={2} md={4} lg={6}>
+    <Col> 
+      <Button size="sm" variant="primary" type="button" onClick={onSubmit}> Update All </Button> 
+    </Col>
+  </Row>
+));
 
 function DAGs() {
-
-  const connect_on_load = () => { setCurrentSocketUrl(generateAsyncUrlGetter(SOCKET_URL_ONE)) }
 
   const [currentSocketUrl, setCurrentSocketUrl] = useState(null);
   const [messageHistory, setMessageHistory] = useState(null);
@@ -132,27 +120,32 @@ function DAGs() {
   );
 
   useEffect(() => {
-    lastMessage && setMessageHistory(lastMessage.data);
-   
-    if (lastMessage){
-        setMessageHistory(lastMessage.data);
+    if (lastMessage) {
+      setMessageHistory(lastMessage.data);
+      const msgType = lastMessage.data.split(':')[0];
 
-        if (lastMessage.data.split(':')[0] === 'BasicDAG' ){
-               console.log("Found BasicDAG");
-               setmessageBasicDAG(lastMessage.data) ;
-        };
+      if (msgType === 'BasicDAG') {
+        console.log("Found BasicDAG");
+        setmessageBasicDAG(lastMessage.data);
+      } else if (msgType === 'DupNodes') {
+        console.log("Found DupNodes");
+        setmessageDuplicateNodesDAG(lastMessage.data);
+      } else if (msgType === 'FX') {
+        console.log("Found FX");
+        setmessageFxDAG(lastMessage.data);
+      }
+    }
+  }, [lastMessage]);
 
-        if (lastMessage.data.split(':')[0] === 'DupNodes' ){
-               console.log("Found DupNodes");
-               setmessageDuplicateNodesDAG(lastMessage.data) ;
-        };
-
-        if (lastMessage.data.split(':')[0] === 'FX' ){
-               console.log("Found FX");
-               setmessageFxDAG(lastMessage.data) ;
-        };
-    };
-  }, [lastMessage, messageHistory, messageFxDAG, messageBasicDAG, messageDuplicateNodesDAG ]);
+  const [nodeA, setNodeA] = useState('');
+  const [nodeB, setNodeB] = useState('');
+  const [nodeC, setNodeC] = useState('');
+  const [nodeD, setNodeD] = useState('');
+  const [node_gbp_usd, setNodeGbpUsd] = useState('');
+  const [node_usd_eur, setNodeUsdEur] = useState('');
+  const [node_eur_gbp, setNodeEurGbp] = useState('');
+  
+  const [value, setValue] = useState('1');
 
   const readyStateString = {
     0: 'CONNECTING',
@@ -161,119 +154,60 @@ function DAGs() {
     3: 'CLOSED',
   }[readyState];
 
-  const [toggleStatusBasic, setToggleStatusBasic] = useState(true)
-  const [toggleStatusDupNodes, setToggleStatusDupNodes] = useState(true)
-  const [toggleStatusFX, setToggleStatusFX] = useState(true)
+  const handleKeyDown = useCallback((event) => {
+    if (event.key === 'Enter') {
+      if (event && typeof event.preventDefault === 'function') event.preventDefault();
+      const itemId = itemMap[event.target.id];
+      if (itemId) {
+        console.log('Send node/value', event.target.id, event.target.value);
+        axios.patch(
+          `${API_CALL}/items/${itemId}?value=${event.target.value}&client_id=${start}`,
+          { headers: { 'Content-Type': 'application/json; charset=utf-8' } }
+        ).catch(err => console.error(`Error updating ${itemId}:`, err));
+      }
+    }
+  }, []);
 
-  const [nodeValue, setNodeValue] = useState(null)
-
-  const doSubmitA= (e) => {
-    e.preventDefault();
-    console.log('Send node value, nodeA', nodeA)
-    axios.patch(API_CALL + '/items/A?value=' + nodeA ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
+  const sendPatch = (itemId, value) => {
+    axios.patch(`${API_CALL}/items/${itemId}?value=${value}&client_id=${start}`,
+      { headers: { 'Content-Type': 'application/json; charset=utf-8' } }
+    ).catch(err => console.error(`Error updating ${itemId}:`, err));
   }
 
-  const doSubmitB= (e) => {
-    e.preventDefault();
-    console.log('Send node value, nodeB', nodeB)
-    axios.patch(API_CALL + '/items/B?value=' + nodeB ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-  }
+  const makeSubmitHandler = (itemId, stateValue) => (e) => {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    console.log(`Send node value, ${itemId}:`, stateValue);
+    sendPatch(itemId, stateValue);
+  };
 
-  const doSubmitC= (e) => {
-    e.preventDefault();
-    console.log('Send node value, nodeC', nodeC)
-    axios.patch(API_CALL + '/items/C?value=' + nodeC ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-  }
+  const makeBatchSubmitHandler = (itemIds, stateValues) =>
+    useCallback((e) => {
+      e.preventDefault();
+      itemIds.forEach((id, i) => sendPatch(id, stateValues[i]));
+    }, stateValues);
 
-  const doSubmitD= (e) => {
-    e.preventDefault();
-    console.log('Send node value, nodeD', nodeD)
-    axios.patch(API_CALL + '/items/D?value=' + nodeD ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-  }
+  const doSubmitA = useCallback(makeSubmitHandler('A', nodeA), [nodeA]);
+  const doSubmitB = useCallback(makeSubmitHandler('B', nodeB), [nodeB]);
+  const doSubmitC = useCallback(makeSubmitHandler('C', nodeC), [nodeC]);
+  const doSubmitD = useCallback(makeSubmitHandler('D', nodeD), [nodeD]);
+  const doSubmitGbpUsd = useCallback(makeSubmitHandler('gbp-usd', node_gbp_usd), [node_gbp_usd]);
+  const doSubmitUsdEur = useCallback(makeSubmitHandler('usd-eur', node_usd_eur), [node_usd_eur]);
+  const doSubmitEurGbp = useCallback(makeSubmitHandler('eur-gbp', node_eur_gbp), [node_eur_gbp]);
 
-  const doSubmitBasic= (e) => {
-    e.preventDefault();
-    console.log('Send all node values, nodeA', nodeA, 'nodeB', nodeB, 'nodeC', nodeC)
 
-    axios.patch(API_CALL + '/items/A?value=' + nodeA ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
+  const doSubmitBasic = makeBatchSubmitHandler(['A', 'B', 'C'], [nodeA, nodeB, nodeC]);
 
-    axios.patch(API_CALL + '/items/B?value=' + nodeB ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-
-    axios.patch(API_CALL + '/items/C?value=' + nodeC ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-  }
-
-  const doSubmitDupNodes= (e) => {
-    e.preventDefault();
-    console.log('Send all node values, nodeA', nodeA, 'nodeB', nodeB, 'nodeD', nodeD)
-
-    axios.patch(API_CALL + '/items/A?value=' + nodeA ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-
-    axios.patch(API_CALL + '/items/B?value=' + nodeB ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-
-    axios.patch(API_CALL + '/items/D?value=' + nodeD ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-  }
+  const doSubmitDupNodes = makeBatchSubmitHandler(['A', 'B', 'D'], [nodeA, nodeB, nodeD]);
   
-  const doSubmitFX= (e) => {
-    e.preventDefault();
-    console.log('Send all node values, node_gbp_usd', node_gbp_usd, 'node_usd_eur', node_usd_eur, 'node_eur_gbp', node_eur_gbp)
-
-    axios.patch(API_CALL + '/items/gbp-usd?value=' + node_gbp_usd ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-
-    axios.patch(API_CALL + '/items/usd-eur?value=' + node_usd_eur ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-
-    axios.patch(API_CALL + '/items/eur-gbp?value=' + node_eur_gbp ,
-    { headers: { 'Content-Type': 'application/json; charset=utf-8', } }
-    )
-  }
-
-const [nodeA, setNodeA] = useState(0);
-const [nodeB, setNodeB] = useState(0);
-const [nodeC, setNodeC] = useState(0);
-const [nodeD, setNodeD] = useState(0);
-	
-const [node_gbp_usd, setNodeGbpUsd] = useState(0);
-const [node_usd_eur, setNodeUsdEur] = useState(0);
-const [node_eur_gbp, setNodeEurGbp] = useState(0);
+  const doSubmitFX = makeBatchSubmitHandler(['gbp-usd', 'usd-eur', 'eur-gbp'], [node_gbp_usd, node_usd_eur, node_eur_gbp]);
 
 
-
-// NEW
-const [value, setValue] = useState('1')
-const handleChange = (event, newValue) => { setValue(newValue);
-};
+const handleChange = useCallback((event, newValue) => { setValue(newValue); }, []);
 
 useEffect(() => {
-//    const handleLoad = () => setPageLoaded(true)
-    connect_on_load()
-    console.log('loaded!!')
-    },
-    [])
-
-
+  setCurrentSocketUrl(generateAsyncUrlGetter(SOCKET_URL_ONE));
+  console.log('loaded!!')
+}, []);
 
 return ( 
     <div style={{margin:"10px"}}>
@@ -293,202 +227,37 @@ return (
               <Tab label="Duplicate nodes" value="2" />
               <Tab label="FX DAG" value="3" />
             </TabList>
-            </Box>
-            <TabPanel value="1">
-              {GraphvizPage(messageBasicDAG)}
-              <br />
-              <Row xs={2} md={4} lg={6}>
-                <Col  style={{ width: '15px' }} >A</Col>
-                <Col> <Form.Control 
-                    id="nodeA"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeA(e.target.value)}
-                    /> 
-                </Col>
-                <Col> <Button size="sm" 
-                    variant="primary" 
-                    type="submit" 
-                    onClick={doSubmitA}> Update A </Button> 
-                </Col>
-              </Row>
+          </Box>
 
-              <Row xs={2} md={4} lg={6}>
-                <Col  style={{ width: '15px' }} >B</Col>
-                <Col> <Form.Control 
-                    id="nodeB"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeB(e.target.value)}
-                    /> 
-                </Col>
-                <Col> 
-                  <Button size="sm" 
-                          variant="primary" 
-                          type="submit" 
-                          onClick={doSubmitB}> Update B </Button> </Col>
-              </Row>
-
-              <Row xs={2} md={4} lg={6}>
-              <Col  style={{ width: '15px' }} >C</Col>
-              <Col> <Form.Control 
-                    id="nodeC"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeC(e.target.value)}
-                /> 
-              </Col>
-              <Col> 
-                <Button size="sm" 
-                    variant="primary" 
-                    type="submit" 
-                    onClick={doSubmitC}> 
-                    Update C 
-                </Button> 
-              </Col>
-            </Row>
-
-            <Row xs={2} md={4} lg={6}>
-              <Col> 
-              </Col>
-              </Row>
-              <br />
-              <Row xs={2} md={4} lg={6}>
-                <Col> 
-                  <Button size="sm" 
-                     variant="primary" 
-                     type="submit" 
-                     onClick={doSubmitBasic}> Update All
-                  </Button> 
-                </Col>
-              </Row>	
-            </TabPanel>
-
-            <TabPanel value="2">{GraphvizPage(messageDuplicateNodesDAG)}
-              <Row xs={2} md={4} lg={6}>
-                <Col  style={{ width: '15px' }} >A</Col>
-                <Col> <Form.Control 
-                    id="nodeA"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeA(e.target.value)} /> 
-                </Col>
-                <Col> <Button size="sm" 
-                              variant="primary" 
-                              type="submit" 
-                              onClick={doSubmitA}> 
-                              Update A </Button> 
-                </Col>
-              </Row>
-
-              <Row xs={2} md={4} lg={6}>
-                <Col  style={{ width: '15px' }} >B</Col>
-                <Col> <Form.Control 
-                    id="nodeB"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeB(e.target.value)} /> 
-                </Col>
-                <Col> <Button size="sm" 
-                              variant="primary" 
-                              type="submit" 
-                              onClick={doSubmitB}> 
-                              Update B 
-                      </Button> 
-                </Col>
-              </Row>
-
-              <Row xs={2} md={4} lg={6}>
-                <Col  style={{ width: '15px' }} >D</Col>
-                <Col> <Form.Control 
-                          id="nodeD"
-                          type="number" 
-                          value={nodeValue}
-                          placeholder="Node value" 
-                          onKeyDown={handleKeyDown}
-                          onChange={(e) => setNodeD(e.target.value)} /> 
-                </Col>
-                <Col> <Button size="sm" 
-                              variant="primary" 
-                              type="submit" 
-                              onClick={doSubmitD}> 
-                              Update D 
-                      </Button> 
-                </Col>
-              </Row>
-
-              <Row xs={2} md={4} lg={6}>
-                <Col> </Col>
-              </Row>
-              <br/>
-              <Row xs={2} md={4} lg={6}>
-                <Col> <Button size="sm" 
-                              variant="primary" 
-                              type="submit" 
-                              onClick={doSubmitDupNodes}> Update All 
-                      </Button> 
-                </Col>
-              </Row>
-            </TabPanel>
-
-            <TabPanel value="3">{GraphvizPage(messageFxDAG)}
-              <Row xs={2} md={4} lg={6}>
-                <Col>gbp-usd</Col>
-                <Col> <Form.Control 
-                    id="node_gbp_usd"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeGbpUsd(e.target.value)} /> 
-                </Col>
-              </Row>
-              <Row xs={2} md={4} lg={6}>
-                <Col>usd-eur</Col>
-                <Col> <Form.Control 
-                    id="node_usd_eur"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeUsdEur(e.target.value)} /> 
-                </Col>
-              </Row>
-
-              <Row xs={2} md={4} lg={6}>
-                <Col>eur-gbp</Col>
-                <Col> <Form.Control 
-                    id="node_eur_gbp"
-                    type="number" 
-                    value={nodeValue}
-                    placeholder="Node value" 
-                    onKeyDown={handleKeyDown}
-                    onChange={(e) => setNodeEurGbp(e.target.value)} /> 
-                </Col>
-              </Row>
-              <br />
-              <Row xs={2} md={4} lg={6}>
-                <Col> <Button size="sm" 
-                              variant="primary" 
-                              type="submit" 
-                              onClick={doSubmitFX}> Update All 
-                      </Button> 
-                </Col>
-              </Row>
+          <TabPanel value="1">
+            {GraphvizPage(messageBasicDAG)}
+            <br />
+            <NodeRow label="A" id="nodeA" value={nodeA} setValue={setNodeA} onSubmit={doSubmitA} handleKeyDown={handleKeyDown} />
+            <NodeRow label="B" id="nodeB" value={nodeB} setValue={setNodeB} onSubmit={doSubmitB} handleKeyDown={handleKeyDown} />
+            <NodeRow label="C" id="nodeC" value={nodeC} setValue={setNodeC} onSubmit={doSubmitC} handleKeyDown={handleKeyDown} />
+            <br />
+            <UpdateAll onSubmit={doSubmitBasic} />
           </TabPanel>
 
 
-          </TabContext>
+          <TabPanel value="2">{GraphvizPage(messageDuplicateNodesDAG)}
+            <br />
+            <NodeRow label="A" id="nodeA" value={nodeA} setValue={setNodeA} onSubmit={doSubmitA} handleKeyDown={handleKeyDown} />
+            <NodeRow label="B" id="nodeB" value={nodeB} setValue={setNodeB} onSubmit={doSubmitB} handleKeyDown={handleKeyDown} />
+            <NodeRow label="D" id="nodeD" value={nodeD} setValue={setNodeD} onSubmit={doSubmitD} handleKeyDown={handleKeyDown} />
+            <br />
+            <UpdateAll onSubmit={doSubmitDupNodes} />
+          </TabPanel>
+          
+          <TabPanel value="3">{GraphvizPage(messageFxDAG)}
+            <br />
+            <NodeRow label="gbp_usd" id="node_gbp_usd" value={node_gbp_usd} setValue={setNodeGbpUsd} onSubmit={doSubmitGbpUsd} handleKeyDown={handleKeyDown} />
+            <NodeRow label="usd_eur" id="node_usd_eur" value={node_usd_eur} setValue={setNodeUsdEur} onSubmit={doSubmitUsdEur} handleKeyDown={handleKeyDown} />
+            <NodeRow label="eur_gbp" id="node_eur_gbp" value={node_eur_gbp} setValue={setNodeEurGbp} onSubmit={doSubmitEurGbp} handleKeyDown={handleKeyDown} />
+            <br />
+            <UpdateAll onSubmit={doSubmitFX} />
+          </TabPanel>
+        </TabContext>
       </Box>
     </>
     }
@@ -638,38 +407,15 @@ function Updates() {
   );
 }
 
-// Simple Router Implementation
-function DELRouter({ routes, children }) {
-  const [currentPath, setCurrentPath] = useState(window.location.pathname);
-
-  useEffect(() => {
-    const handlePopState = () => {
-      setCurrentPath(window.location.pathname);
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  // Make navigate function available globally
-  window.navigate = (path) => {
-    window.history.pushState({}, '', path);
-    setCurrentPath(path);
-  };
-
-  const currentRoute = routes.find(route => route.path === currentPath);
-  const Component = currentRoute ? currentRoute.component : NotFound;
-
-  return <Component />;
+function NotFound() {
+  return (
+    <div style={{margin:"10px"}}>
+      <h1>404 - Page Not Found</h1>
+      <p>The page you're looking for doesn't exist.</p>
+    </div>
+  );
 }
 
-// Navigation Hook
-function navigate(path) {
-  window.history.pushState({}, '', path);
-  window.dispatchEvent(new PopStateEvent('popstate'));
-}
-
-//export default function App() {
 // Main App with React Router
 function App() {
   const [currentPath, setCurrentPath] = useState(window.location.pathname);
@@ -731,4 +477,3 @@ function App() {
 }
 
 export default App
-
